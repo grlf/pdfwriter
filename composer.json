@@ -1,0 +1,25 @@
+{
+    "name": "grlf/pdfwriter",
+    "type": "library",
+    "description": "A PDF Writing library that uses blade for rendering and writing pdfs",
+    "keywords": ["pdf", "blade", "laravel"],
+    "homepage": "http://www.greenleafmedia.com",
+    "license": "MIT",
+    "authors": [
+        {"name": "John Hoopes", "email": "john@greenleafmedia.com"},
+        {"name": "Matt Scott", "email": "matt@greenleafmedia.com"},
+    ],
+    "require": {
+        "php": ">=5.5.9",
+        "knplabs/knp-snappy": "^0.4.3",
+        "h4cc/wkhtmltopdf-amd64": "0.12.x"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.8|~5.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "GreenleafMedia\\PDFWriter\\": "src"
+        }
+    },
+}
