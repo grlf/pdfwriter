@@ -1,69 +1,146 @@
 <?php
 namespace Greenleaf\PDFWriter;
 
+use Illuminate\Database\Eloquent\Model;
 use Knp\Snappy\Pdf;
 
 class PDFWriter
 {
+    /**
+     * @var Pdf Snappy PDF Library instance
+     */
+    protected $snappy;
+
+    /**
+     * @var string The Blade PDF template to use
+     */
     protected $template;
 
+    /**
+     * @var mixed Data to be passed to
+     */
     protected $data;
 
-    public function __construct($template, $data)
+    /**
+     * @var string $filename
+     */
+    protected $filename;
+
+    /**
+     * @var string $headerLogo
+     */
+    protected $headerLogo;
+
+    /**
+     * @var string $customHeader Custom header variable
+     */
+    protected $customHeader;
+    protected $customFooter;
+
+    /**
+     * @var bool $showPageNumbers Whether or not to show page numbers in the footer area
+     */
+    protected $showPageNumbers = false;
+
+    /**
+     * @var bool $showDate Whether or not to show dates in the footer area
+     */
+    protected $showDate = false;
+
+    /**
+     * PDFWriter constructor.
+     * @param string $template blade template file
+     * @param Model $data Some Eloquent model record that we're passing into the view for creating the PDF
+     * @param string $filename The file name you'd like the pdf to be saved as
+     */
+    public function __construct($template, $data, $filename = 'file.pdf', $withHeaaderLogo = false)
     {
         $this->template = $template;
         $this->data = $data;
+        $this->filename = $filename;
+        $this->headerLogo = $withHeaaderLogo;
+        $this->snappy = new Pdf(base_path() . '/vendor/h4cc/wkhtmltopdf-amd64/bin/wkhtmltopdf-amd64');
+    }
+
+
+    public function customHeaderHTML($html = '') {
+        $this->customHeader = $html;
+
+        return $this;
+    }
+
+    public function customFooterHTML($html = '') {
+        $this->customFooter = $html;
+
+        return $this;
+    }
+
+    public function showPages() {
+        $this->showPageNumbers = true;
+
+        return $this;
+    }
+
+    public function showDates() {
+        $this->showDate = true;
+
+        return $this;
     }
 
     public function printInline()
     {
-        $snappy = new Pdf(base_path() . '/vendor/h4cc/wkhtmltopdf-amd64/bin/wkhtmltopdf-amd64');
 
-        $snappy->setOption('header-html', '<!DOCTYPE html><body><img src="' .
-            base_path() . '/public/images/header_logo.png" /></body></html>');
-        $snappy->setOption('header-spacing', 5);
+        $this->header();
+        $this->footer();
 
-        $this->populateTemplate();
         header('Content-Type: application/pdf');
-        header('Content-Disposition: inline; filename="file.pdf"');
+        header('Content-Disposition: inline; filename="' . $this->filename . '"');
 
-        echo $snappy->getOutputFromHtml($this->populateTemplate());
+        echo $this->snappy->getOutputFromHtml($this->populateTemplate());
     }
+
+
+    public function header()
+    {
+
+        if($this->headerLogo && empty($this->customHeader)) {
+            $this->snappy->setOption('header-html', '<!DOCTYPE html><body><img src="' . $this->headerLogo . '" /></body></html>');
+            $this->snappy->setOption('header-spacing', 5);
+        }else {
+            $this->snappy->setOption('header-html', $this->customHeader);
+            $this->snappy->setOption('header-spacing', 5);
+        }
+    }
+
+    public function footer()
+    {
+
+        if($this->customFooter) {
+            $this->snappy->setOption('footer-html', $this->customFooter);
+        }else{
+
+            if($this->showDate) {
+                $this->snappy->setOption('footer-left', \Carbon::now()->format('m/d/Y'));
+            }
+
+            if($this->showPageNumbers) {
+                $this->snappy->setOption('footer-right', 'Page [page] of [topage]');
+            }
+
+        }
+
+    }
+
 
     /**
      * This function uses the blade template engine for populating the PDF.
-     * http://stackoverflow.com/questions/16891398/is-there-any-way-to-compile-a-blade-template-from-a-string
      *
      * @return string
      * @throws \Exception
      */
     protected function populateTemplate()
     {
-        $generated = \Blade::compileString(
-            file_get_contents(base_path() . '/resources/views/pdf_templates/' . $this->template)
-        );
-
-        //Set environment for view
-        $__env = view();
-
-        ob_start() and extract($this->data->toArray(), EXTR_SKIP);
-
-        // We'll include the view contents for parsing within a catcher
-        // so we can avoid any WSOD errors. If an exception occurs we
-        // will throw it out to the exception handler.
-        try {
-            eval('?>'.$generated);
-        }
-
-        // If we caught an exception, we'll silently flush the output
-        // buffer so that no partially rendered views get thrown out
-        // to the client and confuse the user with junk.
-        catch (\Exception $e) {
-            ob_get_clean();
-            throw $e;
-        }
-
-        $content = ob_get_clean();
+        $content = view(\Config::get('pdfwriter')['pdf_blade_files'] . '.' . $this->template, ['record'=> $this->data])->render();
 
         return $content;
     }
