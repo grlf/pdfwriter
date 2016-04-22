@@ -99,6 +99,14 @@ class PDFWriter
         echo $this->snappy->getOutputFromHtml($this->populateTemplate());
     }
 
+    public function save_to_file($filepath) {
+
+        $this->header();
+        $this->footer();
+
+        $this->snappy->generateFromHtml($this->populateTemplate(), $filepath . '/' . $this->filename);
+    }
+
 
     public function header()
     {
@@ -134,7 +142,7 @@ class PDFWriter
 
     /**
      * This function uses the blade template engine for populating the PDF.
-     *
+     *s
      * @return string
      * @throws \Exception
      */
