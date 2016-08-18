@@ -87,6 +87,13 @@ class PDFWriter
         return $this;
     }
 
+    public function setOrientation($orientation="Portrait")
+    {
+        $this->snappy->setOption('orientation',$orientation);
+
+        return $this;
+    }
+
     public function printInline()
     {
 
