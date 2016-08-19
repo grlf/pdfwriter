@@ -100,6 +100,15 @@ class PDFWriter
         $this->header();
         $this->footer();
 
+        if (\Config::get('pdfwriter')['pdf_debug']) {
+            $options = $this->snappy->getOptions();
+            $html = $options['header-html'];
+            $html .= $this->populateTemplate();
+            $html .= $options['footer-html'];
+            echo str_replace(base_path() .'/public', url(), $html);
+            exit;
+        }
+
         header('Content-Type: application/pdf');
         header('Content-Disposition: inline; filename="' . $this->filename . '"');
 
