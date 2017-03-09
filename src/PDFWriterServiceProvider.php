@@ -19,6 +19,16 @@ class PDFWriterServiceProvider extends ServiceProvider
     protected $defer = false;
 
     /**
+     * Perform post-registration booting of services.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        $this->loadViewsFrom(realpath(__DIR__.'/../') .'/resources/views', 'pdfwriter');
+    }
+
+    /**
      * Register the service provider.
      *
      * @return void

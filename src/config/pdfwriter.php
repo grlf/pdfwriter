@@ -6,8 +6,13 @@
 
 return [
 
-    'pdf_blade_files' => '/resources/views/pdf_templates',
+    /** Assumes /resources/views  */
+    'pdf_blade_files' => 'pdf_templates',
 
-    'pdf_debug' => false
+    'pdf_debug' => false,
+
+    'pdf_css' => [],
+
+    'pdf_js' => []
 
 ];

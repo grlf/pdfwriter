@@ -2,6 +2,7 @@
 namespace Greenleaf\PDFWriter;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\URL;
 use Knp\Snappy\Pdf;
 
 class PDFWriter
@@ -105,7 +106,7 @@ class PDFWriter
             $html = $options['header-html'];
             $html .= $this->populateTemplate();
             $html .= $options['footer-html'];
-            echo str_replace(base_path() .'/public', url(), $html);
+            echo str_replace(base_path() .'/public', URL::to('/'), $html);
             exit;
         }
 
