@@ -106,7 +106,7 @@ class PDFWriter
             $html = $options['header-html'];
             $html .= $this->populateTemplate();
             $html .= $options['footer-html'];
-            echo str_replace(base_path() .'/public', URL::to('/'), $html);
+            echo $html;
             exit;
         }
 
