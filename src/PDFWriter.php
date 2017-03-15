@@ -61,6 +61,7 @@ class PDFWriter
         $this->filename = $filename;
         $this->headerLogo = $withHeaaderLogo;
         $this->snappy = new Pdf(\Config::get('pdfwriter')['wkhtml_path']);
+        $this->snappy->setTimeout(\Config::get('pdfwriter.pdf_generation_timeout'));
     }
 
 
