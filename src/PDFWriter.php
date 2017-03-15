@@ -60,7 +60,7 @@ class PDFWriter
         $this->data = $data;
         $this->filename = $filename;
         $this->headerLogo = $withHeaaderLogo;
-        $this->snappy = new Pdf(base_path() . '/vendor/h4cc/wkhtmltopdf-amd64/bin/wkhtmltopdf-amd64');
+        $this->snappy = new Pdf(\Config::get('pdfwriter')['wkhtml_path']);
     }
 
 
