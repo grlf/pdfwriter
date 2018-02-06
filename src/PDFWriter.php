@@ -54,41 +54,79 @@ class PDFWriter
      * @param Model $data Some Eloquent model record that we're passing into the view for creating the PDF
      * @param string $filename The file name you'd like the pdf to be saved as
      */
-    public function __construct($template, $data, $filename = 'file.pdf', $withHeaaderLogo = false)
+    public function __construct($template, $data, $filename = 'file.pdf', $withHeaaderLogo = false, $wkhtmltopdfPath = null, $timeout = null)
     {
         $this->template = $template;
         $this->data = $data;
         $this->filename = $filename;
         $this->headerLogo = $withHeaaderLogo;
-        $this->snappy = new Pdf(\Config::get('pdfwriter.wkhtml_path'));
-        $this->snappy->setTimeout(\Config::get('pdfwriter.wkhtml_timeout'));
+
+        if($wkhtmltopdfPath !== null) {
+            $this->snappy = new Pdf($wkhtmltopdfPath);
+        } else {
+            $this->snappy = new Pdf(\Config::get('pdfwriter.wkhtml_path'));
+        }
+
+        if($timeout !== null) {
+            $this->snappy->setTimeout($timeout);
+        }else {
+            $this->snappy->setTimeout(\Config::get('pdfwriter.wkhtml_timeout'));
+        }
     }
 
 
+    /**
+     * Add custom header HTML to the PDF Writer
+     *
+     * @param string $html
+     * @return $this
+     */
     public function customHeaderHTML($html = '') {
         $this->customHeader = $html;
 
         return $this;
     }
 
+    /**
+     * Add custom Footer HTML to the PDF Writer
+     *
+     * @param string $html
+     * @return $this
+     */
     public function customFooterHTML($html = '') {
         $this->customFooter = $html;
 
         return $this;
     }
 
+    /**
+     * Show page numbers at the bottom of PDFs
+     *
+     * @return $this
+     */
     public function showPages() {
         $this->showPageNumbers = true;
 
         return $this;
     }
 
+    /**
+     * Show the current date in the footer of the PDF
+     *
+     * @return $this
+     */
     public function showDates() {
         $this->showDate = true;
 
         return $this;
     }
 
+    /**
+     * Set the orientation of the PDF
+     *
+     * @param string $orientation
+     * @return $this
+     */
     public function setOrientation($orientation="Portrait")
     {
         $this->snappy->setOption('orientation',$orientation);
@@ -96,6 +134,25 @@ class PDFWriter
         return $this;
     }
 
+    /**
+     * Returns the raw
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getPDFOutput()
+    {
+        $this->header();
+        $this->footer();
+
+        return $this->snappy->getOutputFromHtml($this->populateTemplate());
+    }
+
+    /**
+     * Prints the PDF inline
+     *
+     * @throws \Exception
+     */
     public function printInline()
     {
 
@@ -117,6 +174,12 @@ class PDFWriter
         echo $this->snappy->getOutputFromHtml($this->populateTemplate());
     }
 
+    /**
+     * Saves the PDF to the file path you specify
+     *
+     * @param $filepath
+     * @throws \Exception
+     */
     public function save_to_file($filepath) {
 
         $this->header();
@@ -125,7 +188,9 @@ class PDFWriter
         $this->snappy->generateFromHtml($this->populateTemplate(), $filepath . '/' . $this->filename);
     }
 
-
+    /**
+     * Header function to build the PDF Header
+     */
     public function header()
     {
 
@@ -138,6 +203,9 @@ class PDFWriter
         }
     }
 
+    /**
+     * Footer function to build the PDF footer
+     */
     public function footer()
     {
 
