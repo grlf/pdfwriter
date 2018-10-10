@@ -16,7 +16,7 @@ return [
     'pdf_js' => [],
 
     //Need Full path to executable
-    'wkhtml_path' => env('WKHTML_PATH', base_path() . '/vendor/h4cc/wkhtmltopdf-amd64/bin/wkhtmltopdf-amd64'),
+    'wkhtml_path' => env('WKHTML_PATH', base_path() . '/vendor/grlf/wkhtmltopdf/bin/wkhtmltopdf-amd64'),
     'wkhtml_timeout' => env('WKHTML_TIMEOUT', 60)
 
 ];
